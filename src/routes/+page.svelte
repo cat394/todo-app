@@ -1,2 +1,5 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<h1>Welcome to this website!</h1>
+<p>Please sign in or sign up to use the todo app.</p>
+
+<a href="/sign-up">Sign up</a>
+<a href="/sign-in">Sign in</a>
