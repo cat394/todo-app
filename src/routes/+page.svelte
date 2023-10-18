@@ -1,10 +1,10 @@
 <div class="container">
 	<div>
-		<h1>Welcome to this website!</h1>
-		<p>Please sign in or sign up to use the todo app.</p>
+		<h1>Welcome to this Todo App!!</h1>
+		<p>Please sign in or sign up to use this app.</p>
 		<div class="buttons">
-			<a href="/sign-up" role="button">Sign up</a>
-			<a href="/sign-in" role="button">Sign in</a>
+			<a href="/sign-up" role="button" class="contrast">Sign up</a>
+			<a href="/sign-in" role="button" class="secondary">Sign in</a>
 		</div>
 	</div>
 </div>
@@ -19,8 +19,8 @@
 		place-items: center;
 	}
 	.buttons {
-		display: flex;
-		justify-content: center;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 		gap: var(--size-3);
 	}
 </style>

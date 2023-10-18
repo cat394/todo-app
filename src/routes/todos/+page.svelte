@@ -1,43 +1,50 @@
-<script>
+<script lang="ts">
+	import { superForm } from 'sveltekit-superforms/client';
+	import { todoSchema } from '$lib/validateSchema';
+
 	export let data;
+
+	const { form, errors } = superForm(data.form, {
+		validators: todoSchema
+	});
 </script>
 
 <div class="container">
-	<div class="layout">
-		<div class="form">
-			<form method="POST" action="?/create">
-				<label>
-					Title: <input type="text" name="title" required />
-				</label>
-				<label>
-					Description: <textarea name="description" />
-				</label>
-				<button type="submit">Add todo</button>
-			</form>
-		</div>
-		<div class="todos">
-			<h1>Todos：</h1>
-			<ul>
-				{#each data.todos as todo (todo.id)}
-					<li>
-						<div class="text">
-							<b>{todo.title}</b>
-							<p>{todo.description}</p>
-						</div>
-						<div class="buttons">
-							<form method="POST" action="?/complete">
-								<button type="submit">Completed</button>
-								<input type="hidden" name="id" value={todo.id} />
-							</form>
-							<form method="POST" action="?/delete">
-								<button type="submit">Delete</button>
-								<input type="hidden" name="id" value={todo.id} />
-							</form>
-						</div>
-					</li>
-				{/each}
-			</ul>
-		</div>
+	<div class="form">
+		<form method="POST" action="?/create">
+			<label>
+				Title:
+				<input type="text" name="title" bind:value={$form.title} aria-invalid={$errors.title ? "true" : undefined} required />
+			</label>
+			<label>
+				Description:
+				<textarea name="description" bind:value={$form.description} aria-invalid={$errors.description ? "true" : undefined} required />
+			</label>
+			<button type="submit">Add todo</button>
+		</form>
+	</div>
+	<div class="todos">
+		<h1>Todos:</h1>
+		<ul>
+			{#each data.todos as todo (todo.id)}
+				<li>
+					<div class="text">
+						<b>{todo.title}</b>
+						<p>{todo.description}</p>
+					</div>
+					<div class="buttons">
+						<form method="POST" action="?/complete">
+							<button type="submit" class="outline">Completed</button>
+							<input type="hidden" name="id" value={todo.id} />
+						</form>
+						<form method="POST" action="?/delete">
+							<button type="submit" class="secondary">Delete</button>
+							<input type="hidden" name="id" value={todo.id} />
+						</form>
+					</div>
+				</li>
+			{/each}
+		</ul>
 	</div>
 </div>
 
@@ -50,6 +57,8 @@
 		border: 2px solid var(--gray-3);
 		border-radius: var(--radius-1);
 		padding: var(--size-3);
+		display: flex;
+		gap: var(--size-3);
 	}
 
 	textarea {
@@ -58,6 +67,8 @@
 	.container {
 		height: 100%;
 		margin-inline: var(--size-8);
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 	}
 
 	.todos {

@@ -1,16 +1,18 @@
-import { redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import { fail, redirect } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms/server';
 import { db } from '$lib/server/db';
 import { todosTable } from '$lib/server/schema';
-import { eq } from 'drizzle-orm';
 import { verifyAuthJWT } from '$lib/server/jwt';
-import { superValidate } from 'sveltekit-superforms/server';
 import { todoIdSchema, todoSchema } from '$lib/validateSchema';
 
-export const load = async ({ cookies }) => {
-	const token = cookies.get('auth_token');
+export const load = async (event) => {
+	const token = event.cookies.get('auth_token');
 	if (!token) {
 		throw redirect(301, '/sign-up');
 	}
+
+	const form = await superValidate(event, todoSchema);
 
 	const userPayload = await verifyAuthJWT(token);
 
@@ -23,7 +25,7 @@ export const load = async ({ cookies }) => {
 		})
 		.from(todosTable)
 		.where(eq(todosTable.user_id, userPayload.id));
-	return { todos };
+	return { todos, form };
 };
 
 export const actions = {
@@ -36,6 +38,10 @@ export const actions = {
 		const form = await superValidate(event, todoSchema);
 		const title = form.data.title;
 		const description = form.data.description;
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
 
 		const userPayload = await verifyAuthJWT(token);
 

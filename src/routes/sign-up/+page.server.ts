@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
+import { setError, superValidate } from 'sveltekit-superforms/server';
 import { redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { usersTable } from '$lib/server/schema';
 import { db } from '$lib/server/db';
 import { createAuthJWT } from '$lib/server/jwt';
-import { fail } from '@sveltejs/kit';
-import { setError, superValidate } from 'sveltekit-superforms/server';
 import { newUserSchema } from '$lib/validateSchema';
 
 export const load = async (event) => {
@@ -26,9 +26,7 @@ export const actions = {
 		const password = form.data.password;
 
 		if (!form.valid) {
-			return fail(400, {
-				form
-			});
+			return fail(400, { form });
 		}
 
 		const isExistEmail = await db
@@ -59,9 +57,7 @@ export const actions = {
 			id: newUser[0].id
 		});
 
-		event.cookies.set('auth_token', token, {
-			path: '/'
-		});
+		event.cookies.set('auth_token', token, { path: '/' });
 
 		throw redirect(301, '/todos');
 	}

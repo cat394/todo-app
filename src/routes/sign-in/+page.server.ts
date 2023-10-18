@@ -1,18 +1,21 @@
 import bcrypt from 'bcrypt';
 import { db } from '$lib/server/db';
 import { usersTable } from '$lib/server/schema';
-import { error, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { createAuthJWT } from '$lib/server/jwt';
 import { superValidate } from 'sveltekit-superforms/server';
 import { signInUserSchema } from '$lib/validateSchema';
 
-export const load = async ({ cookies }) => {
-	const token = cookies.get('auth_token');
+export const load = async (event) => {
+	const token = event.cookies.get('auth_token');
 
 	if (token) {
 		throw redirect(301, '/todos');
 	}
+
+	const form = await superValidate(event, signInUserSchema);
+	return { form };
 };
 
 export const actions = {
@@ -20,6 +23,10 @@ export const actions = {
 		const form = await superValidate(event, signInUserSchema);
 		const email = form.data.email;
 		const password = form.data.password;
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
 
 		const user = await db
 			.select({
@@ -29,7 +36,7 @@ export const actions = {
 				password: usersTable.password
 			})
 			.from(usersTable)
-			.where(eq(usersTable.email, email.toString()))
+			.where(eq(usersTable.email, email))
 			.limit(1);
 
 		if (user.length === 0) {
@@ -48,9 +55,7 @@ export const actions = {
 			id: user[0].id
 		});
 
-		event.cookies.set('auth_token', token, {
-			path: '/'
-		});
+		event.cookies.set('auth_token', token, { path: '/' });
 
 		throw redirect(301, '/todos');
 	}
