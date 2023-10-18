@@ -1,4 +1,6 @@
 <script lang="ts">
+  import "open-props/style";
+  import "@picocss/pico";
   import Header from "$lib/components/Header.svelte";
   import Footer from "$lib/components/Footer.svelte";
 </script>
@@ -13,7 +15,7 @@
 
 <style>
   .layout {
-    min-width: 100vh;
+    min-height: 100vh;
     display: grid;
     grid-template-rows: auto 1fr auto;
   }
