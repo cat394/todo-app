@@ -4,7 +4,7 @@ import * as jose from "jose";
 
 type JWTPayload = {
   firstName: string;
-  lastNmae: string;
+  lastName: string;
   email: string;
   id: number;
 };
