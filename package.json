@@ -31,9 +31,13 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@auth/core": "^0.17.0",
+		"@auth/sveltekit": "^0.3.10",
+		"@picocss/pico": "^1.5.10",
 		"bcrypt": "^5.1.1",
 		"drizzle-orm": "^0.28.6",
 		"jose": "^4.15.4",
+		"open-props": "^1.6.7",
 		"postgres": "^3.4.0"
 	}
 }
