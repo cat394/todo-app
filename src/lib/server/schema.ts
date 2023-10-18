@@ -12,7 +12,8 @@ export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
   first_name: varchar("first_name", { length: 255 }).notNull(),
   last_name: varchar("last_name", { length: 255 }).notNull(),
-  email: varchar("password", { length: 255 }).notNull()
+  email: varchar("email", { length: 255 }).notNull(),
+  password: varchar("password", { length: 255 }).notNull()
 });
 
 export const todosTable = pgTable("todos", {
@@ -20,7 +21,7 @@ export const todosTable = pgTable("todos", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   completed: boolean("completed").notNull(),
-  user_id: integer("user_id").notNull()
+  user_id: integer("user_id").notNull(),
 });
 
 export const usersTableRelations = relations(usersTable, ({ many }) => ({
