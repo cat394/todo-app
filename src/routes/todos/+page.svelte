@@ -7,7 +7,7 @@
     <div class="form">
       <form method="POST" action="?/create">
         <label>
-          Title: <input type="text" name="title">
+          Title: <input type="text" name="title" required>
         </label>
         <label>
           Description: <textarea name="description"></textarea>
@@ -19,23 +19,23 @@
       <h1>Todos：</h1>
       <ul>
         {#each data.todos as todo (todo.id)}
-        <li>
-          <div class="text">
-            <b>{todo.title}</b>
-            <p>{todo.description}</p>
-          </div>
-          <div class="buttons">
-            <form method="POST" action="?/complete">
-              <button type="submit">Completed</button>
-              <input type="hidden" name="id" value={todo.id}>
-            </form>
-            <form method="POST" action="?/delete">
-              <button type="submit">Delete</button>
-              <input type="hidden" name="id" value={todo.id}>
-            </form>
-          </div>
-        </li>
-      {/each}
+          <li>
+            <div class="text">
+              <b>{todo.title}</b>
+              <p>{todo.description}</p>
+            </div>
+            <div class="buttons">
+              <form method="POST" action="?/complete">
+                <button type="submit">Completed</button>
+                <input type="hidden" name="id" value={todo.id}>
+              </form>
+              <form method="POST" action="?/delete">
+                <button type="submit">Delete</button>
+                <input type="hidden" name="id" value={todo.id}>
+              </form>
+            </div>
+          </li>
+        {/each}
       </ul>
     </div>
   </div>

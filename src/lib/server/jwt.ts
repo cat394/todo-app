@@ -3,8 +3,7 @@ import { error } from "@sveltejs/kit";
 import * as jose from "jose";
 
 type JWTPayload = {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   id: number;
 };

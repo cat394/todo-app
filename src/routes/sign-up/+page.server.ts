@@ -1,52 +1,65 @@
 import bcrypt from "bcrypt";
+import { eq } from "drizzle-orm";
 import { redirect } from '@sveltejs/kit';
-import { usersTable } from "$lib/server/schema.js";
-import { db } from "$lib/server/db.js";
-import { createAuthJWT } from "$lib/server/jwt.js";
+import { usersTable } from "$lib/server/schema";
+import { db } from "$lib/server/db";
+import { createAuthJWT } from "$lib/server/jwt";
+import { fail } from "@sveltejs/kit"
+import { setError, superValidate } from "sveltekit-superforms/server"
+import { newUserSchema } from "$lib/validateSchema";
 
-export const load = async ({ cookies }) => {
-  const token = cookies.get("auth_token");
-
+export const load = async (event) => {
+  const token = event.cookies.get("auth_token");
   if (token) {
-    throw redirect(301, "/todos")
+    throw redirect(301, "/todos");
   }
+
+  const form = await superValidate(event, newUserSchema);
+	return { form }
 };
 
 export const actions = {
-  default: async ({ request, cookies }) => {
-    const formData = await request.formData();
-    const first_name = formData.get("first_name") || "";
-    const last_name = formData.get("last_name") || "";
-    const email = formData.get("email") || "";
-    const password = formData.get("password") || "";
+  default: async (event) => {
+    const form = await superValidate(event, newUserSchema);
+    const name = form.data.name;
+    const email = form.data.email;
+    const password = form.data.password;
 
-    /*
-      ADD VALIDATION HERE!!!!
-    
-    
-    */ 
+		if (!form.valid) {
+			return fail(400, {
+				form
+			})
+		}
 
-    const hashedPassword = await bcrypt.hash(password.toString(), 10);
+    const isExistEmail = await db
+      .select({
+        email: usersTable.email
+      })
+      .from(usersTable)
+      .where(eq(usersTable.email, form.data.email))
+    
+    if (isExistEmail.length) {
+      return setError(form, 'email', 'E-mail already exists.');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await db.insert(usersTable).values({
-      first_name,
-      last_name,
+      name,
       email,
       password: hashedPassword
     }).returning();
 
-    // Remove toString() after implementing validation!!!
     const token = await createAuthJWT({
-      firstName: first_name.toString(),
-      lastName: last_name.toString(),
-      email: email.toString(),
+      name,
+      email,
       id: newUser[0].id
-    })
+    });
 
-    cookies.set("auth_token", token, {
+    event.cookies.set("auth_token", token, {
       path: "/"
     });
 
-    throw redirect(301, "/todos")
+    throw redirect(301, "/todos");
   }
 }

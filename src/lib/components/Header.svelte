@@ -3,8 +3,10 @@
 </script>
 
 <header>
-  <b>Todo App</b>
-  <a href="/sign-out" role="button" class="outline">Sign-out</a>
+  <b><a href="/">Todo App</a></b>
+  {#if $page.url.pathname.startsWith("/todos")}
+    <a href="/sign-out" role="button" class="outline">Sign-out</a>
+  {/if}
 </header>
 
 <style>

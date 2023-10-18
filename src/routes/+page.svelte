@@ -3,7 +3,7 @@
     <h1>Welcome to this website!</h1>
     <p>Please sign in or sign up to use the todo app.</p>
     <div class="buttons">
-      <a href="/sign-up" role="button">Create new account</a>
+      <a href="/sign-up" role="button">Sign up</a>
       <a href="/sign-in" role="button">Sign in</a>    
     </div>
   </div>

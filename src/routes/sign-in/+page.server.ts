@@ -1,39 +1,30 @@
 import bcrypt from "bcrypt";
-import { db } from '$lib/server/db.js';
-import { usersTable } from '$lib/server/schema.js';
+import { db } from '$lib/server/db';
+import { usersTable } from '$lib/server/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { createAuthJWT } from "$lib/server/jwt.js";
+import { createAuthJWT } from "$lib/server/jwt";
+import { superValidate } from "sveltekit-superforms/server";
+import { signInUserSchema } from "$lib/validateSchema";
 
 export const load = async ({ cookies }) => {
   const token = cookies.get("auth_token");
 
   if (token) {
-    throw redirect(301, "/todos")
+    throw redirect(301, "/todos");
   }
 };
 
 export const actions = {
-  default:async ({ cookies, request }) => {
-    const formData = await request.formData();
-    const email = formData.get("email");
-    const password = formData.get("password");
-
-    /*
-      ADD VALIDATION HERE!!!!
-    
-    
-    */ 
-
-    if (!email || !password) {
-      throw error(400, "must provide email and password");
-    }
+  default: async (event) => {
+    const form = await superValidate(event, signInUserSchema);
+    const email = form.data.email;
+    const password = form.data.password;
 
     const user = await db
       .select({
         id: usersTable.id,
-        first_name: usersTable.first_name,
-        last_name: usersTable.last_name,
+        name: usersTable.name,
         email: usersTable.email,
         password: usersTable.password,
       })
@@ -45,27 +36,25 @@ export const actions = {
       throw error(404, "user account is not found")
     }
 
-    // Remove toString() after implementing validation!!!
     const passwordIsRight = await bcrypt.compare(
-      password.toString(),
+      password,
       user[0].password
     )
 
     if (!passwordIsRight) {
-      throw error(400, "incorrect password")
+      throw error(400, "incorrect password");
     }
 
     const token = await createAuthJWT({
-      firstName: user[0].first_name,
-      lastName: user[0].last_name,
+      name: user[0].name,
       email: user[0].email,
       id: user[0].id
     });
 
-    cookies.set("auth_token", token, {
+    event.cookies.set("auth_token", token, {
       path: "/"
     });
 
     throw redirect(301, "/todos");
   }
-}
+};
