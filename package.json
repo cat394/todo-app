@@ -39,6 +39,7 @@
 		"bcrypt": "^5.1.1",
 		"drizzle-orm": "^0.28.6",
 		"jose": "^4.15.4",
+		"lucide-svelte": "^0.288.0",
 		"open-props": "^1.6.7",
 		"postgres": "^3.4.0"
 	}
