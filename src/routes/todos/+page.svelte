@@ -1,44 +1,54 @@
 <script lang="ts">
-	import { Check, Trash } from "lucide-svelte";
+	import { Check, Construction, Trash } from "lucide-svelte";
 	import { fly, slide } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { todoSchema } from '$lib/validateSchema';
+	import type { Todo } from "$lib/types";
+	import { onMount } from "svelte";
 
 	export let data;
 
 	let creating = false;
-	let deleting: number[] = [];
+	let todos: Todo[] = [];
 
 	const { form, errors } = superForm(data.form, {
 		validators: todoSchema
 	});
+
+	onMount(() => {
+		todos = data.todos;
+	})
+
+	const handleAddTodoSubmit = (formData: FormData) => {
+		const formValues = [...formData.values()] as string[];
+
+		const formDetails: Omit<Todo, 'id' | 'completed'> = {
+			title: formValues[0],
+			description: formValues[1]
+		}
+
+		const newTodo: Todo = {
+			id: todos.length + 1,
+			title: formDetails.title,
+			description: formDetails.description,
+			completed: false
+		};
+
+		todos = [newTodo, ...todos];
+	};
 </script>
 
-<svelte:options immutable={true} />
 <div class="container">
 	<div class="form">
 		<form 
 			method="POST" 
 			action="?/create"
-			use:enhance={() => {
-				creating = true;
-				return async ({ update }) => {
-					await update();
-					creating = false;
-				};
-			}}
+			use:enhance={({ formData }) => handleAddTodoSubmit(formData)}
 		>
 			<label>
 				Title:
-				<input 
-					type="text" 
-					name="title" 
-					bind:value={$form.title} 
-					aria-invalid={$errors.title ? "true" : undefined} 
-					required
-					disabled={creating}
-				/>
+				<input type="text" name="title" bind:value={$form.title} aria-invalid={$errors.title ? "true" : undefined} required disabled={creating} />
 			</label>
 			<label>
 				Description:
@@ -50,28 +60,31 @@
 	<div class="todos">
 		<h1>Todos:</h1>
 		<ul>
-			{#each data.todos.filter((todo) => !deleting.includes(todo.id)) as todo (todo.id)}
+			{#each todos as todo (todo.id)}
 				<li in:fly={{ y: 20 }} out:slide class:completed={todo.completed}>
 					<div class="text">
 						<b>{todo.title}</b>
 						<p>{todo.description}</p>
 					</div>
 					<div class="buttons">
-						<form method="POST" action="?/complete">
+						<form 
+							method="POST"
+							action="?/complete"
+							use:enhance={() => {
+								const todoIndex = todos.findIndex((t) => t.id === todo.id);
+								todos[todoIndex].completed = true;
+							}}
+						>
 							<button type="submit" aria-label="completed">
 								<Check />
 							</button>
 							<input type="hidden" name="id" value={todo.id} />
 						</form>
 						<form 
-							method="POST"
+							method="POST"	
 							action="?/delete"
 							use:enhance={() => {
-								deleting = [...deleting, todo.id];
-								return async ({ update }) => {
-									await update();
-									deleting = deleting.filter((id) => id !== todo.id);
-								};
+								todos = todos.filter((t) => t.id !== todo.id)
 							}}
 						>
 							<button type="submit" class="secondary" aria-label="delete">
@@ -99,6 +112,7 @@
 		height: 100%;
 		display: grid;
 		grid-template-columns: 1fr 1fr;
+		gap: var(--size-5);
 	}
 
 	.todos {
@@ -128,12 +142,6 @@
 
 	.buttons > form > button {
 		border-radius: var(--radius-round);
-	}
-
-	.form {
-		height: 100%;
-		display: flex;
-		align-items: center;
 	}
 
 	.completed {

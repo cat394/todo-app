@@ -58,5 +58,20 @@ export const actions = {
 		event.cookies.set('auth_token', token, { path: '/' });
 
 		throw redirect(301, '/todos');
-	}
+	},
+
+	// githubSignIn: async (event) => {
+	// 	await signIn("github");
+	// 	const session = await event.locals.getSession();
+	// 	if (session && session.user && session.user.name && session.user.email) {
+	// 		const token = await createAuthJWT({
+	// 			name: session.user.name,
+	// 			email: session.user.email,
+	// 		});
+	
+	// 		event.cookies.set('auth_token', token, { path: '/' });
+	
+	// 		throw redirect(301, '/todos');
+	// 	}
+	// }
 };
